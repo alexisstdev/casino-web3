@@ -9,15 +9,15 @@ const PORT = process.env.PORT || 3007;
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/cryptoflip", routes);
+app.use("/api", routes);
 
 app.listen(PORT, async () => {
-	console.log(`Running: http://localhost:${PORT}/api/cryptoflip`);
+	console.log(`Running: http://localhost:${PORT}/api`);
 
 	try {
 		await eventListener.startListening();
 	} catch (error) {
-		console.error("❌ Error starting event listener:", error);
+		console.error("Error starting event listener:", error);
 	}
 });
 

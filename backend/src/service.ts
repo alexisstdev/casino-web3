@@ -10,8 +10,8 @@ import {
 } from "viem";
 import { sepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
-import { loadConfig } from "../utils/config.js";
-import type { PlayerState } from "../types.js";
+import { loadConfig } from "./config.js";
+import type { PlayerState } from "./types.js";
 import fs from "node:fs";
 
 const config = loadConfig();

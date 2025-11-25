@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { gameDB, oracleService } from "./service.js";
 import { parseEther, type Address } from "viem";
-import { loadConfig } from "../utils/config.js";
+import { loadConfig } from "./config.js";
 
 const config = loadConfig();
 
