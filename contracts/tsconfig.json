@@ -1,0 +1,29 @@
+/* Based on https://github.com/tsconfig/bases/blob/501da2bcd640cf95c95805783e1012b992338f28/bases/node22.json */
+{
+  "compilerOptions": {
+    "lib": [
+      "es2023"
+    ],
+    "module": "node16",
+    "target": "es2022",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node16",
+    "outDir": "dist",
+    "noImplicitAny": false,
+  },
+  "include": [
+    "./hardhat.config.ts",
+    "src/scripts",
+    "./deploy",
+    "./test",
+    "nfts/main.ts",
+    "nfts/nft-contract.service.ts",
+    "nfts/nft.service.ts",
+    "nfts/pinata.service.ts",
+    "nfts/types.ts",
+    "src/utils/config.ts",
+    "src/payments/contractHelper.ts"
+  ]
+}
