@@ -9,4 +9,7 @@ export default defineConfig({
 	source: {
 		define: publicVars,
 	},
+	html: {
+		template: "./src/index.html",
+	},
 });
