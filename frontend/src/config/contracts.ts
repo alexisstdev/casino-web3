@@ -10,5 +10,5 @@ export const CONTRACT_ADDRESSES = {
 export const CASINO_GAME_ABI = CasinoGameABI.abi;
 export const CASINO_TOKEN_ABI = CasinoTokenABI.abi;
 
-export const SEPOLIA_CHAIN_ID = 11155111;
+export const SEPOLIA_CHAIN_ID = "0x66eee";
 export const SEPOLIA_RPC_URL = import.meta.env.VITE_SEPOLIA_RPC_URL;

@@ -2,8 +2,7 @@ import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
 // ¡IMPORTANTE! Reemplaza esto con la Public Key de la wallet de tu Backend
 // Esta es la dirección que el contrato usará para verificar las firmas.
-const ORACLE_ADDRESS = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
-// ORACLE PRIVATE KEY (Temporal) = 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+const ORACLE_ADDRESS = "0x5864d8b2d2f4d4832b93a911eb1ffef36a525285";
 
 export default buildModule("CasinoModule", (m) => {
 	// 1. Obtener la cuenta que está desplegando (el Owner)

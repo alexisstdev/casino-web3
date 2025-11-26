@@ -40,6 +40,8 @@ export class CryptoFlipController {
 	}
 
 	static async signFlip(req: Request, res: Response): Promise<void> {
+		console.log("[FLIP] Solicitando firma...");
+
 		try {
 			const { playerAddress, betAmount } = req.body;
 
@@ -62,7 +64,10 @@ export class CryptoFlipController {
 			const state = gameDB.getPlayerState(playerAddress);
 			const isKarmaReady = state.karmaPool >= KARMA_THRESHOLD;
 
-			const currentNonce = gameDB.getNonce(playerAddress);
+			const currentNonce = await oracleService.getContractNonce(
+				playerAddress as Address,
+				config.CASINO_GAME_CONTRACT_ADDRESS as Address,
+			);
 
 			const signature = await oracleService.signGameData(
 				playerAddress as Address,
@@ -75,6 +80,8 @@ export class CryptoFlipController {
 			);
 
 			// NO incrementar el nonce aquí, el contrato lo incrementará después de verificar la firma
+
+			console.log("[FLIP] Firma generada para", playerAddress);
 
 			res.json({
 				streak: state.streak,

@@ -18,7 +18,7 @@ interface UIState {
 interface GameControlsProps {
 	wallet: WalletState;
 	uiState: UIState;
-	onBalanceUpdate: (balance: number) => void;
+	onBalanceUpdate: () => void;
 	onStatusChange: (status: TransactionStatus) => void;
 	onCoinSideChange: (side: CoinSide) => void;
 	onBetChange: (bet: number) => void;
@@ -26,7 +26,6 @@ interface GameControlsProps {
 }
 
 export const GameControls = ({
-	wallet,
 	uiState,
 	onBalanceUpdate,
 	onStatusChange,
@@ -37,18 +36,29 @@ export const GameControls = ({
 	const { bet, status } = uiState;
 
 	const { mutate: flip, isPending } = useFlip(
-		wallet.address,
 		(data) => {
-			// Success callback
+			// Success callback - mostrar resultado
 			onStatusChange(TRANSACTION_STATUS.RESULT);
 			onCoinSideChange(data.coinSide);
 			onLastResultChange(data.result);
-			onBalanceUpdate(data.newBalance);
+			onBalanceUpdate();
+
+			// Volver a IDLE después de mostrar el resultado
+			setTimeout(() => {
+				onStatusChange(TRANSACTION_STATUS.IDLE);
+				onLastResultChange(null);
+			}, 2500);
 		},
 		(error) => {
 			// Error callback
 			console.error("Flip error:", error);
 			onStatusChange(TRANSACTION_STATUS.IDLE);
+		},
+		(status) => {
+			// Status update callback - para cambiar a MINING cuando se envía la TX
+			if (status === "MINING") {
+				onStatusChange(TRANSACTION_STATUS.MINING);
+			}
 		},
 	);
 

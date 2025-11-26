@@ -1,7 +1,5 @@
 import { Wallet } from "lucide-react";
-import { useConnectWallet } from "../hooks/useApi";
-import { TRANSACTION_STATUS } from "../constants/game";
-import type { TransactionStatus } from "../types/game";
+import { useWalletConnection } from "../hooks/useApi";
 
 interface WalletState {
 	address: string | null;
@@ -10,15 +8,14 @@ interface WalletState {
 
 interface NavbarProps {
 	wallet: WalletState;
-	onWalletConnect: (wallet: WalletState) => void;
-	setStatus: (status: TransactionStatus) => void;
 }
 
-export const Navbar = ({ wallet, onWalletConnect, setStatus }: NavbarProps) => {
-	const { mutate: connectWallet, isPending } = useConnectWallet((data) => {
-		onWalletConnect(data);
-		setStatus(TRANSACTION_STATUS.IDLE);
-	});
+export const Navbar = ({ wallet }: NavbarProps) => {
+	const { connectMetaMask, isConnecting } = useWalletConnection();
+
+	const handleConnect = () => {
+		connectMetaMask();
+	};
 
 	const isConnected = !!wallet.address;
 
@@ -29,13 +26,13 @@ export const Navbar = ({ wallet, onWalletConnect, setStatus }: NavbarProps) => {
 			{!isConnected ? (
 				<button
 					type="button"
-					onClick={() => connectWallet()}
-					disabled={isPending}
+					onClick={handleConnect}
+					disabled={isConnecting}
 					className="group relative px-5 py-2.5 bg-white text-black font-black text-xs uppercase tracking-wider rounded shadow-lg hover:scale-105 transition-transform disabled:opacity-50"
 				>
 					<span className="relative z-10 flex items-center gap-2">
 						<Wallet className="w-4 h-4" />{" "}
-						{isPending ? "Conectando..." : "Conectar"}
+						{isConnecting ? "Conectando..." : "Conectar"}
 					</span>
 					<div className="absolute inset-0 bg-linear-to-r from-indigo-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity rounded" />
 				</button>

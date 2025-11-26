@@ -18,22 +18,16 @@ const config: HardhatUserConfig = {
 		},
 	},
 	networks: {
-		hardhatMainnet: {
-			type: "edr-simulated",
-			chainType: "l1",
-		},
-		hardhatOp: {
-			type: "edr-simulated",
-			chainType: "op",
-		},
-		sepolia: {
+		arbSepolia: {
 			type: "http",
-			chainType: "l1",
-			url: process.env.SEPOLIA_URL || configVariable("SEPOLIA_URL"),
+			url: process.env.SEPOLIA_URL || configVariable("SEPOLIA_URL"), // La URL que obtuviste de Alchemy
 			accounts: [
 				process.env.SEPOLIA_PRIVATE_KEY ||
 					configVariable("SEPOLIA_PRIVATE_KEY"),
 			],
+			chainId: 421614, // ID oficial de Arbitrum Sepolia
+			// Se recomienda usar un gas price bajo en L2, aunque Ethers/Viem lo maneja automáticamente.
+			// gasPrice: 100000000, // 0.1 gwei (opcional para L2)
 		},
 	},
 };

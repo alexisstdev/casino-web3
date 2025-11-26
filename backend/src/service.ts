@@ -8,7 +8,7 @@ import {
 	keccak256,
 	encodePacked,
 } from "viem";
-import { sepolia } from "viem/chains";
+import { arbitrumSepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import { loadConfig } from "./config.js";
 import type { PlayerState } from "./types.js";
@@ -92,14 +92,47 @@ export class GameDatabase {
 export class OracleService {
 	private account;
 	private walletClient;
+	private publicClient;
 
 	constructor(privateKey: string) {
 		this.account = privateKeyToAccount(`0x${privateKey}` as `0x${string}`);
+
 		this.walletClient = createWalletClient({
 			account: this.account,
-			chain: sepolia,
+			chain: arbitrumSepolia,
 			transport: http(config.SEPOLIA_URL),
 		});
+		// Inicializamos publicClient para leer del contrato
+		this.publicClient = createPublicClient({
+			chain: arbitrumSepolia,
+			transport: http(config.SEPOLIA_URL),
+		});
+	}
+
+	async getContractNonce(
+		playerAddress: Address,
+		contractAddress: Address,
+	): Promise<number> {
+		try {
+			const nonce = await this.publicClient.readContract({
+				address: contractAddress,
+				abi: [
+					{
+						inputs: [{ name: "", type: "address" }],
+						name: "nonces",
+						outputs: [{ name: "", type: "uint256" }],
+						stateMutability: "view",
+						type: "function",
+					},
+				],
+				functionName: "nonces",
+				args: [playerAddress],
+			});
+			return Number(nonce);
+		} catch (error) {
+			console.error("Error fetching nonce from contract:", error);
+			return 0; // Fallback (aunque idealmente debería lanzar error)
+		}
 	}
 
 	async signGameData(
@@ -162,10 +195,11 @@ export class EventListenerService {
 				"utf8",
 			),
 		);
+
 		this.abi = contractArtifact.abi;
 
 		this.publicClient = createPublicClient({
-			chain: sepolia,
+			chain: arbitrumSepolia,
 			transport: http(config.SEPOLIA_URL),
 		});
 	}
