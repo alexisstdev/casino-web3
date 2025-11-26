@@ -9,4 +9,23 @@ export default defineConfig({
 	source: {
 		define: publicVars,
 	},
+
+	output: {
+		manifest: true,
+	},
+
+	html: {
+		meta: {
+			viewport: "width=device-width, initial-scale=1.0",
+		},
+		tags: [
+			{
+				tag: "link",
+				attrs: {
+					rel: "manifest",
+					href: "/manifest.json",
+				},
+			},
+		],
+	},
 });

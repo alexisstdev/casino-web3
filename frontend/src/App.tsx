@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { useState, useEffect } from "react";
 import "./App.css";
+import "./manifest.json";
 import { Background } from "./components/Background";
 import { CoinStage } from "./components/CoinStage";
 import { GameControls } from "./components/GameControls";
