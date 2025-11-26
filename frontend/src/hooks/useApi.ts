@@ -76,15 +76,28 @@ export const useWalletConnection = () => {
 	const { address, isConnected, chainId } = useAccount();
 	const { connect, connectors, isPending: isConnecting } = useConnect();
 	const { disconnect } = useDisconnect();
-	const { switchChain } = useSwitchChain();
+	const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
 	const { balance, refetch: refetchBalance } = useChipBalance();
+
+	// Verificar si está en la red correcta
+	const isCorrectChain = chainId === arbitrumSepolia.id;
 
 	const connectWallet = () => {
 		playSound("click");
 		// Usar el primer conector disponible (generalmente injected/MetaMask)
 		const connector = connectors[0];
 		if (connector) {
-			connect({ connector });
+			connect(
+				{ connector, chainId: arbitrumSepolia.id },
+				{
+					onSuccess: () => {
+						// Después de conectar, verificar si necesita cambiar de red
+						if (chainId !== arbitrumSepolia.id) {
+							switchChain({ chainId: arbitrumSepolia.id });
+						}
+					},
+				},
+			);
 		}
 	};
 
@@ -97,7 +110,8 @@ export const useWalletConnection = () => {
 	return {
 		address: address ?? null,
 		isConnected,
-		isConnecting,
+		isConnecting: isConnecting || isSwitchingChain,
+		isCorrectChain,
 		balance,
 		chainId,
 		connectWallet,

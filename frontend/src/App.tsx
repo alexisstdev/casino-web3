@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { useState, useEffect } from "react";
 import "./App.css";
-import "./manifest.json";
 import { Background } from "./components/Background";
 import { CoinStage } from "./components/CoinStage";
 import { GameControls } from "./components/GameControls";
@@ -23,8 +22,14 @@ const AppContent = () => {
 		amount: number;
 	} | null>(null);
 
-	const { address, isConnected, balance, refetchBalance } =
-		useWalletConnection();
+	const {
+		address,
+		isConnected,
+		isCorrectChain,
+		balance,
+		refetchBalance,
+		ensureCorrectChain,
+	} = useWalletConnection();
 
 	// Actualizar status cuando se conecta/desconecta
 	useEffect(() => {
@@ -34,6 +39,13 @@ const AppContent = () => {
 			setStatus(TRANSACTION_STATUS.DISCONNECTED);
 		}
 	}, [isConnected, status, setStatus]);
+
+	// Cambiar automáticamente a Arbitrum Sepolia si está en red incorrecta
+	useEffect(() => {
+		if (isConnected && !isCorrectChain) {
+			ensureCorrectChain();
+		}
+	}, [isConnected, isCorrectChain, ensureCorrectChain]);
 
 	return (
 		<div className="min-h-screen w-full font-sans text-slate-200 overflow-hidden relative selection:bg-purple-500 selection:text-white flex flex-col">
