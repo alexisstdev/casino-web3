@@ -10,8 +10,8 @@
 
 | Contrato | Dirección |
 |----------|-----------|
-| CasinoToken | `[Pegar Dirección Aquí]` |
-| CasinoGame | `[Pegar Dirección Aquí]` |
+| CasinoToken | `0x7aa345bF4598024d9aB6dc09805adBbc97352b2f` |
+| CasinoGame | `0xF74671Dbd4f72CA3FD2F92fc5F5D5Aa4722607A1` |
 
 ## Descripción de la Aplicación
 
