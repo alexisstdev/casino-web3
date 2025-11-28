@@ -6,8 +6,6 @@
 
 **Aplicación:** [https://casino-web3-ten.vercel.app/](https://casino-web3-ten.vercel.app/)
 
----
-
 ## Direcciones de Contratos Desplegados
 
 | Contrato | Dirección |
@@ -15,15 +13,12 @@
 | CasinoToken | `[Pegar Dirección Aquí]` |
 | CasinoGame | `[Pegar Dirección Aquí]` |
 
----
-
 ## Descripción de la Aplicación
 
 Desarrollamos una aplicación descentralizada (DApp) de apuestas o casino con una economía de fichas de casino integrada. El objetivo principal fue crear una experiencia de usuario fluida y adictiva mediante una arquitectura híbrida con Web3.
 
 La aplicación permite a los usuarios comprar fichas de casino con ETH, apostar en un juego de lanzar una moneda y en base a sus resultados intercambiar sus ganancias de vuelta a ETH.
 
----
 
 ## Capturas de Pantalla de la Interfaz
 
@@ -35,7 +30,6 @@ La aplicación permite a los usuarios comprar fichas de casino con ETH, apostar 
 ![Intercambio de fichas](./screenshots/buy-chips.png)
 > *[Insertar captura de la interfaz de intercambio de fichas aquí]*
 
----
 
 ## Arquitectura
 
@@ -53,7 +47,6 @@ Desarrollamos un servidor con **Express** que actúa como nuestro "Oráculo de E
 
 Desplegamos los contratos en la red **Ethereum Sepolia**.
 
----
 
 ## Seguridad e Integridad de Datos (El Patrón Oráculo)
 
@@ -87,7 +80,6 @@ bool playerWon;
 }
 ```
 
----
 
 ## Explicación de los Contratos
 
@@ -128,7 +120,6 @@ Es el cerebro de la aplicación. Maneja la lógica de las apuestas, el intercamb
 
 > **Nota:** Las funciones administrativas (`set...`) solo pueden ser llamadas por el dueño del contrato.
 
----
 
 ## Casos de Uso con Comprobación
 
@@ -142,7 +133,6 @@ Es el cerebro de la aplicación. Maneja la lógica de las apuestas, el intercamb
 3. Confirma la transacción en MetaMask
 4. Recibe 1,000 fichas
 
----
 
 ### Caso 2: Comprar Fichas con ETH
 
@@ -154,7 +144,6 @@ Es el cerebro de la aplicación. Maneja la lógica de las apuestas, el intercamb
 3. Confirma la transacción
 4. Recibe Fichas según la tasa de cambio
 
----
 
 ### Caso 3: Jugar una Partida (Flip)
 
@@ -167,7 +156,6 @@ Es el cerebro de la aplicación. Maneja la lógica de las apuestas, el intercamb
 4. El contrato verifica la firma y ejecuta el juego
 5. Si gana, recibe el doble de su apuesta
 
----
 
 ### Caso 4: Vender fichas por ETH
 
@@ -179,7 +167,6 @@ Es el cerebro de la aplicación. Maneja la lógica de las apuestas, el intercamb
 3. Confirma la transacción de venta
 4. Recibe ETH (menos la comisión de la casa)
 
----
 
 ## Snippets de Código
 
