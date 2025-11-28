@@ -29,8 +29,13 @@ export interface WalletState {
 export interface BackendGameState {
 	address: string;
 	streak: number;
+	streakMultiplier: number;
+	nextMultiplier: number;
+	maxMultiplier: number;
 	karmaPool: string;
-	karmaPoolEth: number;
+	karmaPoolTokens: number;
+	karmaTarget: number;
+	karmaProgress: number;
 	isKarmaReady: boolean;
 	lastUpdate: string;
 }

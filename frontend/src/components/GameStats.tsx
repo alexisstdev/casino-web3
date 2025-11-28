@@ -1,5 +1,6 @@
 import { useBackendGameState } from "../hooks/useBackendGameState";
-import { StatCard } from "./StatCard";
+import { StreakMeter } from "./StreakMeter";
+import { KarmaVault } from "./KarmaVault";
 
 interface GameStatsProps {
 	walletAddress: string | null;
@@ -13,18 +14,16 @@ export const GameStats = ({ walletAddress }: GameStatsProps) => {
 	}
 
 	return (
-		<div className="grid grid-cols-2 lg:grid-cols-2 gap-3">
-			<StatCard
-				title="Racha"
-				value={`${gameState?.streak || 0}x`}
-				icon="🔥"
-				color="orange"
+		<div className="flex items-center justify-center gap-3">
+			<StreakMeter
+				streak={gameState?.streak || 0}
+				currentMultiplier={gameState?.streakMultiplier || 1.9}
 			/>
-			<StatCard
-				title={`Pool Karma (Estado: ${gameState?.isKarmaReady ? "Desbloqueado" : "Bloqueado"})`}
-				value={`${gameState?.karmaPoolEth?.toFixed(2) || "0.00"} ETH`}
-				icon="⚡"
-				color="purple"
+			<KarmaVault
+				currentAmount={gameState?.karmaPoolTokens || 0}
+				targetAmount={gameState?.karmaTarget || 100}
+				progress={gameState?.karmaProgress || 0}
+				isReady={gameState?.isKarmaReady || false}
 			/>
 		</div>
 	);

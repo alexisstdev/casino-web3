@@ -74,6 +74,7 @@ export const useSellChips = (
 				abi: CASINO_GAME_ABI,
 				functionName: "sellChips",
 				args: [chipsAmountWei],
+				gas: 700_000n,
 			});
 
 			console.log("✅ [SELL CHIPS] TX enviada:", txHash);

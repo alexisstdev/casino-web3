@@ -90,10 +90,14 @@ contract CasinoGame is Ownable, ReentrancyGuard {
     // ============================================
 
     /// @notice Comprar CHIPS con ETH
+    /// @dev Las fichas tienen 18 decimales, igual que ETH
+    /// Ejemplo: 0.01 ETH * 10000 = 100 fichas (100e18 en raw units)
     function buyChips() external payable nonReentrant {
         require(msg.value > 0, "Must send ETH to buy chips");
 
-        uint256 chipsAmount = (msg.value * chipsPerEth) / 1 ether;
+        // msg.value ya está en wei (18 decimales), multiplicamos por rate
+        // Resultado: cantidad de fichas con 18 decimales
+        uint256 chipsAmount = msg.value * chipsPerEth;
         require(chipsAmount > 0, "Amount too small");
 
         require(
@@ -115,11 +119,14 @@ contract CasinoGame is Ownable, ReentrancyGuard {
     }
 
     /// @notice Vender CHIPS por ETH (con fee)
+    /// @dev chipsAmount debe estar en raw units (con 18 decimales)
+    /// Ejemplo: 100 fichas = 100e18 raw units → 0.01 ETH
     function sellChips(uint256 chipsAmount) external nonReentrant {
         require(chipsAmount > 0, "Must sell at least some chips");
 
-        // Calcular ETH a devolver
-        uint256 ethAmount = (chipsAmount * 1 ether) / chipsPerEth;
+        // Calcular ETH a devolver (chipsAmount ya tiene 18 decimales)
+        // ethAmount = chipsAmount / chipsPerEth (mantiene 18 decimales)
+        uint256 ethAmount = chipsAmount / chipsPerEth;
 
         // Aplicar fee
         uint256 fee = (ethAmount * sellFeeBps) / 10000;
@@ -150,15 +157,17 @@ contract CasinoGame is Ownable, ReentrancyGuard {
     }
 
     /// @notice Obtener cantidad de CHIPS que se recibirían por X ETH
+    /// @dev Retorna cantidad en unidades formateadas (no raw)
     function getChipsForEth(uint256 ethAmount) external view returns (uint256) {
-        return (ethAmount * chipsPerEth) / 1 ether;
+        return ethAmount * chipsPerEth;
     }
 
     /// @notice Obtener cantidad de ETH que se recibiría por X CHIPS (después del fee)
+    /// @dev chipsAmount debe estar en raw units (con 18 decimales)
     function getEthForChips(
         uint256 chipsAmount
     ) external view returns (uint256 ethAmount, uint256 fee) {
-        uint256 grossEth = (chipsAmount * 1 ether) / chipsPerEth;
+        uint256 grossEth = chipsAmount / chipsPerEth;
         fee = (grossEth * sellFeeBps) / 10000;
         ethAmount = grossEth - fee;
     }
