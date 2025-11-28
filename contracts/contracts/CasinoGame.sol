@@ -262,11 +262,13 @@ contract CasinoGame is Ownable, ReentrancyGuard {
         );
 
         // 3. GENERAR RESULTADO
+        // Usamos block.prevrandao (post-merge) que es impredecible en simulación
         bool playerWon;
         {
             uint256 random = uint256(
                 keccak256(
                     abi.encodePacked(
+                        block.prevrandao, // Randomness del beacon chain (impredecible)
                         block.timestamp,
                         msg.sender,
                         nonces[msg.sender]

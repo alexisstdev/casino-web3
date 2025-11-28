@@ -1,4 +1,4 @@
-import { Wallet, ArrowLeftRight, Coins } from "lucide-react";
+import { ArrowLeftRight, Wallet } from "lucide-react";
 import { useWallet } from "../hooks/useWallet";
 
 interface WalletState {

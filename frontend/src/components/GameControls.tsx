@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback } from "react";
-import { Minus, Plus, Bird, CircleDollarSign } from "lucide-react";
-import { TRANSACTION_STATUS, COIN_SIDE } from "../constants/game";
-import { playSound } from "../utils/sound";
+import { Bird, CircleDollarSign, Minus, Plus } from "lucide-react";
+import { useCallback, useState } from "react";
+import { COIN_SIDE, TRANSACTION_STATUS } from "../constants/game";
 import { useFlip } from "../hooks/useFlip";
-import type { TransactionStatus, CoinSide } from "../types/game";
+import type { CoinSide, TransactionStatus } from "../types/game";
+import { playSound } from "../utils/sound";
 
 interface WalletState {
 	address: string | null;
