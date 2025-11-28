@@ -1,14 +1,11 @@
 import { useState } from "react";
-import {
-	useBuyChips,
-	useSellChips,
-	useExchangeRate,
-	useChipsForEth,
-	useEthForChips,
-	useContractBalances,
-} from "../hooks/useChipExchange";
+import { useBuyChips } from "../hooks/useBuyChips";
+import { useSellChips } from "../hooks/useSellChips";
+import { useExchangeRate, useContractBalances } from "../hooks/useExchangeRate";
+import { useChipsForEth, useEthForChips } from "../hooks/useExchangeCalculator";
 import { useFaucet } from "../hooks/useFaucet";
-import { useWalletConnection } from "../hooks/useApi";
+import { useWallet } from "../hooks/useWallet";
+import { useChipBalance } from "../hooks/useChipBalance";
 
 type TabType = "buy" | "sell";
 
@@ -29,7 +26,8 @@ export const ChipExchange = ({
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-	const { balance, isConnected } = useWalletConnection();
+	const { isConnected } = useWallet();
+	const { balance } = useChipBalance();
 	const { chipsPerEth, sellFeePercent } = useExchangeRate();
 	const { ethBalance, chipsBalance } = useContractBalances();
 	const chipsToReceive = useChipsForEth(buyAmount);

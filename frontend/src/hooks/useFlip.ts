@@ -1,19 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-	useAccount,
-	useConnect,
-	useDisconnect,
-	useReadContract,
-	useWriteContract,
-	useSwitchChain,
-} from "wagmi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAccount, useWriteContract } from "wagmi";
 import { parseUnits, formatUnits, decodeEventLog, type Address } from "viem";
-import { sepolia } from "viem/chains";
-import type {
-	BackendGameState,
-	SignFlipResponse,
-	CoinSide,
-} from "../types/game";
+import { getPublicClient, waitForTransactionReceipt } from "@wagmi/core";
+import type { CoinSide, SignFlipResponse } from "../types/game";
 import { COIN_SIDE } from "../constants/game";
 import { playSound } from "../utils/sound";
 import {
@@ -22,110 +11,10 @@ import {
 	CASINO_TOKEN_ABI,
 } from "../config/contracts";
 import { wagmiConfig } from "../config/wagmi";
-import { getPublicClient, waitForTransactionReceipt } from "@wagmi/core";
 
 const API_BASE_URL =
 	import.meta.env.VITE_API_URL || "http://localhost:3007/api";
 
-// =====================================================
-// QUERY: Estado del juego desde el backend
-// =====================================================
-export const useGameState = (address: string | null) => {
-	return useQuery<BackendGameState>({
-		queryKey: ["gameState", address],
-		queryFn: async () => {
-			if (!address) throw new Error("No hay dirección");
-
-			const response = await fetch(`${API_BASE_URL}/game-state/${address}`);
-			if (!response.ok) throw new Error("Error al obtener estado del juego");
-
-			return response.json();
-		},
-		enabled: !!address,
-		refetchInterval: 5000,
-	});
-};
-
-// =====================================================
-// HOOK: Balance de CHIP tokens (usando Wagmi)
-// =====================================================
-export const useChipBalance = () => {
-	const { address, isConnected } = useAccount();
-
-	const { data: balance, refetch } = useReadContract({
-		address: CONTRACT_ADDRESSES.CASINO_TOKEN,
-		abi: CASINO_TOKEN_ABI,
-		functionName: "balanceOf",
-		args: address ? [address] : undefined,
-		query: {
-			enabled: isConnected && !!address,
-		},
-	});
-
-	const formattedBalance = balance
-		? Math.floor(Number(formatUnits(balance as bigint, 18)))
-		: 0;
-
-	return { balance: formattedBalance, refetch };
-};
-
-// =====================================================
-// HOOK: Conexión de wallet (usando Wagmi)
-// =====================================================
-export const useWalletConnection = () => {
-	const { address, isConnected, chainId } = useAccount();
-	const { connect, connectors, isPending: isConnecting } = useConnect();
-	const { disconnect } = useDisconnect();
-	const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
-	const { balance, refetch: refetchBalance } = useChipBalance();
-
-	// Verificar si está en la red correcta
-	const isCorrectChain = chainId === sepolia.id;
-
-	const connectWallet = () => {
-		playSound("click");
-		// Usar el primer conector disponible (generalmente injected/MetaMask)
-		const connector = connectors[0];
-		if (connector) {
-			connect(
-				{ connector, chainId: sepolia.id },
-				{
-					onSuccess: () => {
-						// Después de conectar, verificar si necesita cambiar de red
-						if (chainId !== sepolia.id) {
-							switchChain({ chainId: sepolia.id });
-						}
-					},
-				},
-			);
-		}
-	};
-
-	const ensureCorrectChain = () => {
-		if (chainId !== sepolia.id) {
-			switchChain({ chainId: sepolia.id });
-		}
-	};
-
-	return {
-		address: address ?? null,
-		isConnected,
-		isConnecting: isConnecting || isSwitchingChain,
-		isCorrectChain,
-		balance,
-		chainId,
-		connectWallet,
-		connectMetaMask: connectWallet, // Alias para compatibilidad
-		disconnect,
-		ensureCorrectChain,
-		refetchBalance,
-		connectors,
-	};
-};
-
-// =====================================================
-// MUTATION: Ejecutar jugada completa (usando Wagmi)
-// =====================================================
 interface FlipParams {
 	choice: CoinSide;
 	betAmount: number;
@@ -141,6 +30,9 @@ interface FlipResult {
 
 type FlipStatus = "SIGNING" | "MINING";
 
+/**
+ * Hook para ejecutar una jugada (flip)
+ */
 export const useFlip = (
 	onSuccess: (data: FlipResult) => void,
 	onError?: (error: Error) => void,
@@ -310,9 +202,7 @@ export const useFlip = (
 			playSound(data.win ? "coin" : "hover");
 
 			if (address) {
-				queryClient.invalidateQueries({
-					queryKey: ["gameState", address],
-				});
+				queryClient.invalidateQueries({ queryKey: ["gameState", address] });
 			}
 		},
 		onError: (error) => {

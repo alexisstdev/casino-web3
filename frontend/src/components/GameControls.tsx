@@ -1,7 +1,7 @@
 import { Minus, Plus } from "lucide-react";
 import { TRANSACTION_STATUS, COIN_SIDE } from "../constants/game";
 import { playSound } from "../utils/sound";
-import { useFlip } from "../hooks/useApi";
+import { useFlip } from "../hooks/useFlip";
 import type { TransactionStatus, CoinSide } from "../types/game";
 
 interface WalletState {

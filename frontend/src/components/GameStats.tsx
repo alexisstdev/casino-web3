@@ -1,4 +1,4 @@
-import { useGameState } from "../hooks/useApi";
+import { useBackendGameState } from "../hooks/useBackendGameState";
 import { StatCard } from "./StatCard";
 
 interface GameStatsProps {
@@ -6,7 +6,7 @@ interface GameStatsProps {
 }
 
 export const GameStats = ({ walletAddress }: GameStatsProps) => {
-	const { data: gameState } = useGameState(walletAddress);
+	const { data: gameState } = useBackendGameState(walletAddress);
 
 	if (!walletAddress) {
 		return null;

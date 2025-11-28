@@ -1,5 +1,5 @@
 import { Wallet, ArrowLeftRight } from "lucide-react";
-import { useWalletConnection } from "../hooks/useApi";
+import { useWallet } from "../hooks/useWallet";
 
 interface WalletState {
 	address: string | null;
@@ -12,10 +12,10 @@ interface NavbarProps {
 }
 
 export const Navbar = ({ wallet, onOpenExchange }: NavbarProps) => {
-	const { connectMetaMask, isConnecting } = useWalletConnection();
+	const { connectWallet, isConnecting } = useWallet();
 
 	const handleConnect = () => {
-		connectMetaMask();
+		connectWallet();
 	};
 
 	const isConnected = !!wallet.address;

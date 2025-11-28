@@ -9,7 +9,8 @@ import { GameStats } from "./components/GameStats";
 import { Navbar } from "./components/Navbar";
 import { ChipExchange } from "./components/ChipExchange";
 import { useUIState } from "./hooks/useGameState";
-import { useWalletConnection } from "./hooks/useApi";
+import { useWallet } from "./hooks/useWallet";
+import { useChipBalance } from "./hooks/useChipBalance";
 import { wagmiConfig } from "./config/wagmi";
 import { TRANSACTION_STATUS } from "./constants/game";
 
@@ -24,14 +25,9 @@ const AppContent = () => {
 	} | null>(null);
 	const [isExchangeOpen, setIsExchangeOpen] = useState(false);
 
-	const {
-		address,
-		isConnected,
-		isCorrectChain,
-		balance,
-		refetchBalance,
-		ensureCorrectChain,
-	} = useWalletConnection();
+	const { address, isConnected, isCorrectChain, ensureCorrectChain } =
+		useWallet();
+	const { balance, refetch: refetchBalance } = useChipBalance();
 
 	// Actualizar status cuando se conecta/desconecta
 	useEffect(() => {
