@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { CryptoFlipController } from "./controller.js";
+import { Controller } from "./controller.js";
 
 const router = Router();
 
-router.get("/game-state/:address", CryptoFlipController.getGameState);
+router.get("/game-state/:address", Controller.getGameState);
 
-router.post("/sign-flip", CryptoFlipController.signFlip);
+router.post("/sign-flip", Controller.signFlip);
 
 export default router;
