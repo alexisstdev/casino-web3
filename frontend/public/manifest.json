@@ -1,7 +1,7 @@
 {
-	"short_name": "CryptoFlip",
-	"name": "CryptoFlip Casino",
-	"description": "Juego de casino descentralizado con tokens CHIP",
+	"short_name": "Casino",
+	"name": "Casino",
+	"description": "Juego de casino descentralizado",
 	"start_url": "/",
 	"display": "standalone",
 	"orientation": "portrait",

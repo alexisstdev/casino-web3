@@ -14,7 +14,7 @@ const STREAK_BONUS = 0.1; // 10% por cada racha
 const MAX_STREAK_BONUS = 0.5; // Máximo 50% adicional
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
-export class CryptoFlipController {
+export class Controller {
 	static async getGameState(req: Request, res: Response): Promise<void> {
 		try {
 			const { address } = req.params;
