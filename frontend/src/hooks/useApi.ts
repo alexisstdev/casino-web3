@@ -8,7 +8,7 @@ import {
 	useSwitchChain,
 } from "wagmi";
 import { parseUnits, formatUnits, decodeEventLog, type Address } from "viem";
-import { arbitrumSepolia } from "viem/chains";
+import { sepolia } from "viem/chains";
 import type {
 	BackendGameState,
 	SignFlipResponse,
@@ -80,7 +80,7 @@ export const useWalletConnection = () => {
 	const { balance, refetch: refetchBalance } = useChipBalance();
 
 	// Verificar si está en la red correcta
-	const isCorrectChain = chainId === arbitrumSepolia.id;
+	const isCorrectChain = chainId === sepolia.id;
 
 	const connectWallet = () => {
 		playSound("click");
@@ -88,12 +88,12 @@ export const useWalletConnection = () => {
 		const connector = connectors[0];
 		if (connector) {
 			connect(
-				{ connector, chainId: arbitrumSepolia.id },
+				{ connector, chainId: sepolia.id },
 				{
 					onSuccess: () => {
 						// Después de conectar, verificar si necesita cambiar de red
-						if (chainId !== arbitrumSepolia.id) {
-							switchChain({ chainId: arbitrumSepolia.id });
+						if (chainId !== sepolia.id) {
+							switchChain({ chainId: sepolia.id });
 						}
 					},
 				},
@@ -102,8 +102,8 @@ export const useWalletConnection = () => {
 	};
 
 	const ensureCorrectChain = () => {
-		if (chainId !== arbitrumSepolia.id) {
-			switchChain({ chainId: arbitrumSepolia.id });
+		if (chainId !== sepolia.id) {
+			switchChain({ chainId: sepolia.id });
 		}
 	};
 

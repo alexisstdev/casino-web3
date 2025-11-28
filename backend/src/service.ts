@@ -8,7 +8,7 @@ import {
 	keccak256,
 	encodePacked,
 } from "viem";
-import { arbitrumSepolia } from "viem/chains";
+import { sepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import { loadConfig } from "./config.js";
 import type { PlayerState } from "./types.js";
@@ -99,12 +99,12 @@ export class OracleService {
 
 		this.walletClient = createWalletClient({
 			account: this.account,
-			chain: arbitrumSepolia,
+			chain: sepolia,
 			transport: http(config.SEPOLIA_URL),
 		});
 		// Inicializamos publicClient para leer del contrato
 		this.publicClient = createPublicClient({
-			chain: arbitrumSepolia,
+			chain: sepolia,
 			transport: http(config.SEPOLIA_URL),
 		});
 	}
@@ -199,7 +199,7 @@ export class EventListenerService {
 		this.abi = contractArtifact.abi;
 
 		this.publicClient = createPublicClient({
-			chain: arbitrumSepolia,
+			chain: sepolia,
 			transport: http(config.SEPOLIA_URL),
 		});
 	}

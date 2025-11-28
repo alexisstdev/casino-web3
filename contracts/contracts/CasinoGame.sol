@@ -12,6 +12,13 @@ contract CasinoGame is Ownable, ReentrancyGuard {
 
     IERC20 public casinoToken;
     address public oracleAddress;
+    address public treasuryAddress; // Dirección para recibir ganancias de la casa
+
+    // Tasa de intercambio: 1 ETH = 10000 CHIPS (configurable)
+    uint256 public chipsPerEth = 10000;
+
+    // Fee de venta (5% = 500 basis points)
+    uint256 public sellFeeBps = 500;
 
     event GameResult(
         address indexed player,
@@ -22,19 +29,182 @@ contract CasinoGame is Ownable, ReentrancyGuard {
         uint256 timestamp
     );
 
+    event ChipsPurchased(
+        address indexed buyer,
+        uint256 ethAmount,
+        uint256 chipsAmount,
+        uint256 timestamp
+    );
+
+    event ChipsSold(
+        address indexed seller,
+        uint256 chipsAmount,
+        uint256 ethAmount,
+        uint256 fee,
+        uint256 timestamp
+    );
+
+    event TreasuryWithdrawal(
+        address indexed to,
+        uint256 amount,
+        uint256 timestamp
+    );
+
     mapping(address => uint256) public nonces;
 
     constructor(
         address _tokenAddress,
-        address _oracleAddress
+        address _oracleAddress,
+        address _treasuryAddress
     ) Ownable(msg.sender) {
         casinoToken = IERC20(_tokenAddress);
         oracleAddress = _oracleAddress;
+        treasuryAddress = _treasuryAddress;
     }
+
+    // ============================================
+    // CONFIGURACIÓN (Solo Owner)
+    // ============================================
 
     function setOracleAddress(address _newOracle) external onlyOwner {
         oracleAddress = _newOracle;
     }
+
+    function setTreasuryAddress(address _newTreasury) external onlyOwner {
+        require(_newTreasury != address(0), "Invalid treasury address");
+        treasuryAddress = _newTreasury;
+    }
+
+    function setChipsPerEth(uint256 _newRate) external onlyOwner {
+        require(_newRate > 0, "Rate must be greater than 0");
+        chipsPerEth = _newRate;
+    }
+
+    function setSellFeeBps(uint256 _newFeeBps) external onlyOwner {
+        require(_newFeeBps <= 2000, "Fee cannot exceed 20%");
+        sellFeeBps = _newFeeBps;
+    }
+
+    // ============================================
+    // COMPRA/VENTA DE CHIPS
+    // ============================================
+
+    /// @notice Comprar CHIPS con ETH
+    function buyChips() external payable nonReentrant {
+        require(msg.value > 0, "Must send ETH to buy chips");
+
+        uint256 chipsAmount = (msg.value * chipsPerEth) / 1 ether;
+        require(chipsAmount > 0, "Amount too small");
+
+        require(
+            casinoToken.balanceOf(address(this)) >= chipsAmount,
+            "Not enough chips in reserve"
+        );
+
+        require(
+            casinoToken.transfer(msg.sender, chipsAmount),
+            "Failed to transfer chips"
+        );
+
+        emit ChipsPurchased(
+            msg.sender,
+            msg.value,
+            chipsAmount,
+            block.timestamp
+        );
+    }
+
+    /// @notice Vender CHIPS por ETH (con fee)
+    function sellChips(uint256 chipsAmount) external nonReentrant {
+        require(chipsAmount > 0, "Must sell at least some chips");
+
+        // Calcular ETH a devolver
+        uint256 ethAmount = (chipsAmount * 1 ether) / chipsPerEth;
+
+        // Aplicar fee
+        uint256 fee = (ethAmount * sellFeeBps) / 10000;
+        uint256 ethToSend = ethAmount - fee;
+
+        require(
+            address(this).balance >= ethToSend,
+            "Not enough ETH in reserve"
+        );
+
+        // Transferir chips del usuario al contrato
+        require(
+            casinoToken.transferFrom(msg.sender, address(this), chipsAmount),
+            "Failed to transfer chips"
+        );
+
+        // Enviar ETH al usuario
+        (bool success, ) = payable(msg.sender).call{value: ethToSend}("");
+        require(success, "Failed to send ETH");
+
+        emit ChipsSold(
+            msg.sender,
+            chipsAmount,
+            ethToSend,
+            fee,
+            block.timestamp
+        );
+    }
+
+    /// @notice Obtener cantidad de CHIPS que se recibirían por X ETH
+    function getChipsForEth(uint256 ethAmount) external view returns (uint256) {
+        return (ethAmount * chipsPerEth) / 1 ether;
+    }
+
+    /// @notice Obtener cantidad de ETH que se recibiría por X CHIPS (después del fee)
+    function getEthForChips(
+        uint256 chipsAmount
+    ) external view returns (uint256 ethAmount, uint256 fee) {
+        uint256 grossEth = (chipsAmount * 1 ether) / chipsPerEth;
+        fee = (grossEth * sellFeeBps) / 10000;
+        ethAmount = grossEth - fee;
+    }
+
+    // ============================================
+    // TREASURY (Retiro de ganancias de la casa)
+    // ============================================
+
+    /// @notice Retirar ETH de las ganancias al treasury
+    function withdrawToTreasury(uint256 amount) external onlyOwner {
+        require(amount > 0, "Amount must be greater than 0");
+        require(address(this).balance >= amount, "Not enough ETH balance");
+
+        (bool success, ) = payable(treasuryAddress).call{value: amount}("");
+        require(success, "Failed to send ETH to treasury");
+
+        emit TreasuryWithdrawal(treasuryAddress, amount, block.timestamp);
+    }
+
+    /// @notice Retirar todo el ETH al treasury
+    function withdrawAllToTreasury() external onlyOwner {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No ETH to withdraw");
+
+        (bool success, ) = payable(treasuryAddress).call{value: balance}("");
+        require(success, "Failed to send ETH to treasury");
+
+        emit TreasuryWithdrawal(treasuryAddress, balance, block.timestamp);
+    }
+
+    /// @notice Ver balance de ETH del contrato
+    function getEthBalance() external view returns (uint256) {
+        return address(this).balance;
+    }
+
+    /// @notice Ver balance de CHIPS del contrato
+    function getChipsBalance() external view returns (uint256) {
+        return casinoToken.balanceOf(address(this));
+    }
+
+    // Recibir ETH directamente (para fondear el contrato)
+    receive() external payable {}
+
+    // ============================================
+    // JUEGO (Flip)
+    // ============================================
 
     function flip(
         bool choiceHeads,
@@ -137,5 +307,13 @@ contract CasinoGame is Ownable, ReentrancyGuard {
 
     function withdrawBankroll(uint256 amount) external onlyOwner {
         casinoToken.transfer(msg.sender, amount);
+    }
+
+    /// @notice Retirar CHIPS del bankroll al treasury
+    function withdrawBankrollToTreasury(uint256 amount) external onlyOwner {
+        require(
+            casinoToken.transfer(treasuryAddress, amount),
+            "Failed to transfer to treasury"
+        );
     }
 }

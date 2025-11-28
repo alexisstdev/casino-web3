@@ -7,6 +7,7 @@ import { CoinStage } from "./components/CoinStage";
 import { GameControls } from "./components/GameControls";
 import { GameStats } from "./components/GameStats";
 import { Navbar } from "./components/Navbar";
+import { ChipExchange } from "./components/ChipExchange";
 import { useUIState } from "./hooks/useGameState";
 import { useWalletConnection } from "./hooks/useApi";
 import { wagmiConfig } from "./config/wagmi";
@@ -21,6 +22,7 @@ const AppContent = () => {
 		win: boolean;
 		amount: number;
 	} | null>(null);
+	const [isExchangeOpen, setIsExchangeOpen] = useState(false);
 
 	const {
 		address,
@@ -40,7 +42,7 @@ const AppContent = () => {
 		}
 	}, [isConnected, status, setStatus]);
 
-	// Cambiar automáticamente a Arbitrum Sepolia si está en red incorrecta
+	// Cambiar automáticamente a Sepolia si está en red incorrecta
 	useEffect(() => {
 		if (isConnected && !isCorrectChain) {
 			ensureCorrectChain();
@@ -56,7 +58,10 @@ const AppContent = () => {
 			`}</style>
 
 			<Background />
-			<Navbar wallet={{ address, balance }} />
+			<Navbar
+				wallet={{ address, balance }}
+				onOpenExchange={() => setIsExchangeOpen(true)}
+			/>
 
 			<main className="relative z-10 grow flex flex-col p-4 max-w-md mx-auto w-full gap-4">
 				<GameStats walletAddress={address} />
@@ -74,6 +79,13 @@ const AppContent = () => {
 					onLastResultChange={setLastResult}
 				/>
 			</main>
+
+			{/* Modal de Exchange */}
+			<ChipExchange
+				isOpen={isExchangeOpen}
+				onClose={() => setIsExchangeOpen(false)}
+				onBalanceUpdate={() => refetchBalance()}
+			/>
 		</div>
 	);
 };

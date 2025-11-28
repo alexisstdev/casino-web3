@@ -1,13 +1,13 @@
 import { http, createConfig, createStorage, cookieStorage } from "wagmi";
-import { arbitrumSepolia } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 
 export const wagmiConfig = createConfig({
-	chains: [arbitrumSepolia],
+	chains: [sepolia],
 	storage: createStorage({
 		storage: cookieStorage,
 	}),
 	transports: {
-		[arbitrumSepolia.id]: http(import.meta.env.VITE_SEPOLIA_RPC_URL),
+		[sepolia.id]: http(import.meta.env.VITE_SEPOLIA_RPC_URL),
 	},
 });
 
