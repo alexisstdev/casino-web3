@@ -9,7 +9,6 @@ export { useUIState } from "./useGameState";
 
 // Exchange
 export { useExchangeRate, useContractBalances } from "./useExchangeRate";
-export { useChipsForEth, useEthForChips } from "./useExchangeCalculator";
 export { useBuyChips } from "./useBuyChips";
 export { useSellChips } from "./useSellChips";
 export { useFaucet } from "./useFaucet";

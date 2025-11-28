@@ -12,12 +12,10 @@ contract CasinoGame is Ownable, ReentrancyGuard {
 
     IERC20 public casinoToken;
     address public oracleAddress;
-    address public treasuryAddress; // Dirección para recibir ganancias de la casa
+    address public treasuryAddress;
 
-    // Tasa de intercambio: 1 ETH = 10000 CHIPS (configurable)
     uint256 public chipsPerEth = 10000;
 
-    // Fee de venta (5% = 500 basis points)
     uint256 public sellFeeBps = 500;
 
     event GameResult(
@@ -62,10 +60,6 @@ contract CasinoGame is Ownable, ReentrancyGuard {
         treasuryAddress = _treasuryAddress;
     }
 
-    // ============================================
-    // CONFIGURACIÓN (Solo Owner)
-    // ============================================
-
     function setOracleAddress(address _newOracle) external onlyOwner {
         oracleAddress = _newOracle;
     }
@@ -85,18 +79,9 @@ contract CasinoGame is Ownable, ReentrancyGuard {
         sellFeeBps = _newFeeBps;
     }
 
-    // ============================================
-    // COMPRA/VENTA DE CHIPS
-    // ============================================
-
-    /// @notice Comprar CHIPS con ETH
-    /// @dev Las fichas tienen 18 decimales, igual que ETH
-    /// Ejemplo: 0.01 ETH * 10000 = 100 fichas (100e18 en raw units)
     function buyChips() external payable nonReentrant {
         require(msg.value > 0, "Must send ETH to buy chips");
 
-        // msg.value ya está en wei (18 decimales), multiplicamos por rate
-        // Resultado: cantidad de fichas con 18 decimales
         uint256 chipsAmount = msg.value * chipsPerEth;
         require(chipsAmount > 0, "Amount too small");
 
@@ -118,17 +103,11 @@ contract CasinoGame is Ownable, ReentrancyGuard {
         );
     }
 
-    /// @notice Vender CHIPS por ETH (con fee)
-    /// @dev chipsAmount debe estar en raw units (con 18 decimales)
-    /// Ejemplo: 100 fichas = 100e18 raw units → 0.01 ETH
     function sellChips(uint256 chipsAmount) external nonReentrant {
         require(chipsAmount > 0, "Must sell at least some chips");
 
-        // Calcular ETH a devolver (chipsAmount ya tiene 18 decimales)
-        // ethAmount = chipsAmount / chipsPerEth (mantiene 18 decimales)
         uint256 ethAmount = chipsAmount / chipsPerEth;
 
-        // Aplicar fee
         uint256 fee = (ethAmount * sellFeeBps) / 10000;
         uint256 ethToSend = ethAmount - fee;
 
@@ -137,13 +116,11 @@ contract CasinoGame is Ownable, ReentrancyGuard {
             "Not enough ETH in reserve"
         );
 
-        // Transferir chips del usuario al contrato
         require(
             casinoToken.transferFrom(msg.sender, address(this), chipsAmount),
             "Failed to transfer chips"
         );
 
-        // Enviar ETH al usuario
         (bool success, ) = payable(msg.sender).call{value: ethToSend}("");
         require(success, "Failed to send ETH");
 
@@ -156,14 +133,10 @@ contract CasinoGame is Ownable, ReentrancyGuard {
         );
     }
 
-    /// @notice Obtener cantidad de CHIPS que se recibirían por X ETH
-    /// @dev Retorna cantidad en unidades formateadas (no raw)
     function getChipsForEth(uint256 ethAmount) external view returns (uint256) {
         return ethAmount * chipsPerEth;
     }
 
-    /// @notice Obtener cantidad de ETH que se recibiría por X CHIPS (después del fee)
-    /// @dev chipsAmount debe estar en raw units (con 18 decimales)
     function getEthForChips(
         uint256 chipsAmount
     ) external view returns (uint256 ethAmount, uint256 fee) {
@@ -172,11 +145,6 @@ contract CasinoGame is Ownable, ReentrancyGuard {
         ethAmount = grossEth - fee;
     }
 
-    // ============================================
-    // TREASURY (Retiro de ganancias de la casa)
-    // ============================================
-
-    /// @notice Retirar ETH de las ganancias al treasury
     function withdrawToTreasury(uint256 amount) external onlyOwner {
         require(amount > 0, "Amount must be greater than 0");
         require(address(this).balance >= amount, "Not enough ETH balance");
@@ -198,22 +166,15 @@ contract CasinoGame is Ownable, ReentrancyGuard {
         emit TreasuryWithdrawal(treasuryAddress, balance, block.timestamp);
     }
 
-    /// @notice Ver balance de ETH del contrato
     function getEthBalance() external view returns (uint256) {
         return address(this).balance;
     }
 
-    /// @notice Ver balance de CHIPS del contrato
     function getChipsBalance() external view returns (uint256) {
         return casinoToken.balanceOf(address(this));
     }
 
-    // Recibir ETH directamente (para fondear el contrato)
     receive() external payable {}
-
-    // ============================================
-    // JUEGO (Flip)
-    // ============================================
 
     function flip(
         bool choiceHeads,
@@ -229,7 +190,6 @@ contract CasinoGame is Ownable, ReentrancyGuard {
             "La banca no tiene fondos suficientes"
         );
 
-        // 1. VERIFICAR FIRMA (Scope separado para liberar variables)
         {
             bytes32 hash = keccak256(
                 abi.encodePacked(
@@ -255,20 +215,17 @@ contract CasinoGame is Ownable, ReentrancyGuard {
 
         nonces[msg.sender]++;
 
-        // 2. COBRAR APUESTA
         require(
             casinoToken.transferFrom(msg.sender, address(this), betAmount),
             "Fallo al cobrar apuesta"
         );
 
-        // 3. GENERAR RESULTADO
-        // Usamos block.prevrandao (post-merge) que es impredecible en simulación
         bool playerWon;
         {
             uint256 random = uint256(
                 keccak256(
                     abi.encodePacked(
-                        block.prevrandao, // Randomness del beacon chain (impredecible)
+                        block.prevrandao,
                         block.timestamp,
                         msg.sender,
                         nonces[msg.sender]
@@ -282,7 +239,6 @@ contract CasinoGame is Ownable, ReentrancyGuard {
         uint256 totalPayout = 0;
         uint256 karmaReleased = 0;
 
-        // 4. CALCULAR PAGO (Scope separado)
         if (playerWon) {
             uint256 multiplier = 190;
 
@@ -305,7 +261,6 @@ contract CasinoGame is Ownable, ReentrancyGuard {
             );
         }
 
-        // 5. EMITIR EVENTO
         emit GameResult(
             msg.sender,
             playerWon,
@@ -320,7 +275,6 @@ contract CasinoGame is Ownable, ReentrancyGuard {
         casinoToken.transfer(msg.sender, amount);
     }
 
-    /// @notice Retirar CHIPS del bankroll al treasury
     function withdrawBankrollToTreasury(uint256 amount) external onlyOwner {
         require(
             casinoToken.transfer(treasuryAddress, amount),
