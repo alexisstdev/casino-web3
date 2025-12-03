@@ -8,7 +8,6 @@ const config = loadConfig();
 const KARMA_THRESHOLD = parseEther("100"); // 100 tokens
 const KARMA_THRESHOLD_TOKENS = 100; // Para cálculos de porcentaje (en fichas)
 
-// Constantes de multiplicadores (deben coincidir con el contrato)
 const BASE_MULTIPLIER = 1.9;
 const STREAK_BONUS = 0.1; // 10% por cada racha
 const MAX_STREAK_BONUS = 0.5; // Máximo 50% adicional
@@ -27,16 +26,14 @@ export class Controller {
 			}
 
 			const state = gameDB.getPlayerState(address);
-			const karmaPoolTokens = Number(state.karmaPool) / 1e18; // Convertir a fichas
+			const karmaPoolTokens = Number(state.karmaPool) / 1e18;
 
-			// Calcular multiplicador actual basado en la racha
 			const streakBonus = Math.min(
 				state.streak * STREAK_BONUS,
 				MAX_STREAK_BONUS,
 			);
 			const currentMultiplier = BASE_MULTIPLIER + streakBonus;
 
-			// Calcular porcentaje de llenado del karma vault
 			const karmaProgress = Math.min(
 				(karmaPoolTokens / KARMA_THRESHOLD_TOKENS) * 100,
 				100,

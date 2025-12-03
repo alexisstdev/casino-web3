@@ -251,33 +251,12 @@ export class EventListenerService {
 
 			console.log("✅ Database updated successfully!");
 
-			// Mostrar estado actual del jugador
 			const state = this.db.getPlayerState(player as string);
 			console.log(`   New Streak: ${state.streak}`);
 			console.log(`   New Karma Pool: ${state.karmaPool}`);
 		} catch (error) {
 			console.error("❌ Error handling GameResult event:", error);
 		}
-	}
-
-	// Método para obtener eventos históricos (opcional)
-	async syncPastEvents(fromBlock: 0n): Promise<void> {
-		console.log("🔄 Syncing past events...");
-
-		const logs = await this.publicClient.getContractEvents({
-			address: this.contractAddress,
-			abi: this.abi,
-			eventName: "GameResult",
-			fromBlock,
-		});
-
-		console.log(`Found ${logs.length} past events`);
-
-		for (const log of logs) {
-			this.handleGameResult(log);
-		}
-
-		console.log("✅ Past events synced!");
 	}
 }
 
